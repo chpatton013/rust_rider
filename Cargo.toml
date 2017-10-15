@@ -1,0 +1,12 @@
+[package]
+name = "rust_rider"
+version = "0.1.0"
+authors = ["Christopher Patton <chpatton013@gmail.com>"]
+
+[dependencies]
+piston = "0.34.0"
+piston_window = "0.72.0"
+
+[features]
+# Treat warnings as a build error.
+strict = []
