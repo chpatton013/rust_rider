@@ -18,8 +18,8 @@ mod rust_rider;
 
 const DEFAULT_WINDOW_TITLE: &str = "Rust Rider";
 const DEFAULT_WINDOW_SIZE: piston_window::Size = piston_window::Size {
-  width: 640,
-  height: 480,
+  width: 1600,
+  height: 1000,
 };
 const DEFAULT_WINDOW_SAMPLES: u8 = 0;
 const DEFAULT_WINDOW_FULLSCREEN: bool = false;
