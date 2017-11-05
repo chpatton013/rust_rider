@@ -12,26 +12,15 @@
 //! or quantity. Together they comprise a course that the character, propelled
 //! by gravity, can ride.
 
-#[macro_use] extern crate error_chain;
+#[macro_use]
+extern crate error_chain;
 extern crate piston_window;
-extern crate serde;
-#[macro_use] extern crate serde_derive;
+#[macro_use]
+extern crate serde_derive;
 extern crate serde_json;
 
-mod error {
-  extern crate serde_json;
-
-  // Create the Error, ErrorKind, ResultExt, and Result types
-  error_chain!{
-    foreign_links {
-      SerdeJson(serde_json::error::Error);
-      StdFmt(::std::fmt::Error);
-      StdIo(::std::io::Error) #[cfg(unix)];
-    }
-  }
-}
-
 mod config;
+mod error;
 mod handler;
 mod rust_rider;
 
@@ -48,8 +37,7 @@ fn run() -> error::Result<()> {
       panic!("Failed to build PistonWindow: {}", error)
     });
   {
-    // Bring set_event_settings() into scope.
-    use piston_window::EventLoop;
+    use piston_window::EventLoop; // set_event_settings
     window.set_event_settings(event_settings);
   }
 
@@ -61,11 +49,11 @@ fn run() -> error::Result<()> {
 
 fn main() {
   if let Err(ref e) = run() {
-    use std::io::Write;
-    use error_chain::ChainedError;
+    use std::io::Write; // writeln
+    use error_chain::ChainedError; // display_chain
 
-    writeln!(::std::io::stderr(), "{}", e.display_chain())
+    writeln!(std::io::stderr(), "{}", e.display_chain())
       .expect("Error writing to stderr");
-    ::std::process::exit(1);
+    std::process::exit(1);
   }
 }
