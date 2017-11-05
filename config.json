@@ -1,0 +1,25 @@
+{
+  "window": {
+    "title": "Rust Rider",
+    "size": {
+      "width": 1600,
+      "height": 1000
+    },
+    "samples": 0,
+    "fullscreen": false,
+    "exit_on_esc": false,
+    "vsync": false,
+    "srgb": false,
+    "resizable": false,
+    "decorated": false,
+    "controllers": false
+  },
+  "event": {
+    "max_fps": 60,
+    "ups": 120,
+    "ups_reset": 2,
+    "swap_buffers": true,
+    "bench_mode": false,
+    "lazy": false
+  }
+}

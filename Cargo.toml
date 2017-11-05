@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Christopher Patton <chpatton013@gmail.com>"]
 
 [dependencies]
+error-chain = "0.11.0"
 nalgebra = "0.13.0"
 ncollide = "0.13.0"
 nphysics2d = "0.6"

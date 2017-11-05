@@ -1,5 +1,6 @@
 #![cfg_attr(feature = "strict", deny(missing_docs))]
 #![cfg_attr(feature = "strict", deny(warnings))]
+#![recursion_limit = "1024"]
 
 //! Rust Rider
 //!
@@ -11,63 +12,36 @@
 //! or quantity. Together they comprise a course that the character, propelled
 //! by gravity, can ride.
 
+#[macro_use] extern crate error_chain;
 extern crate piston_window;
+extern crate serde;
+#[macro_use] extern crate serde_derive;
+extern crate serde_json;
 
-mod handler;
-mod rust_rider;
+mod error {
+  extern crate serde_json;
 
-const DEFAULT_WINDOW_TITLE: &str = "Rust Rider";
-const DEFAULT_WINDOW_SIZE: piston_window::Size = piston_window::Size {
-  width: 1600,
-  height: 1000,
-};
-const DEFAULT_WINDOW_SAMPLES: u8 = 0;
-const DEFAULT_WINDOW_FULLSCREEN: bool = false;
-const DEFAULT_WINDOW_EXIT_ON_ESC: bool = false;
-const DEFAULT_WINDOW_VSYNC: bool = false;
-const DEFAULT_WINDOW_SRGB: bool = false;
-const DEFAULT_WINDOW_RESIZABLE: bool = false;
-const DEFAULT_WINDOW_DECORATED: bool = false;
-const DEFAULT_WINDOW_CONTROLLERS: bool = false;
-
-fn make_window_settings() -> piston_window::WindowSettings {
-  let window_settings = piston_window::WindowSettings::new(
-    DEFAULT_WINDOW_TITLE,
-    DEFAULT_WINDOW_SIZE,
-  ).samples(DEFAULT_WINDOW_SAMPLES)
-    .fullscreen(DEFAULT_WINDOW_FULLSCREEN)
-    .exit_on_esc(DEFAULT_WINDOW_EXIT_ON_ESC)
-    .vsync(DEFAULT_WINDOW_VSYNC)
-    .opengl(piston_window::OpenGL::V3_2)
-    .srgb(DEFAULT_WINDOW_SRGB)
-    .resizable(DEFAULT_WINDOW_RESIZABLE)
-    .decorated(DEFAULT_WINDOW_DECORATED)
-    .controllers(DEFAULT_WINDOW_CONTROLLERS);
-
-  window_settings
-}
-
-const DEFAULT_EVENT_MAX_FPS: u64 = 60;
-const DEFAULT_EVENT_UPS: u64 = 120;
-const DEFAULT_EVENT_UPS_RESET: u64 = 2;
-const DEFAULT_EVENT_SWAP_BUFFERS: bool = true;
-const DEFAULT_EVENT_BENCH_MODE: bool = false;
-const DEFAULT_EVENT_LAZY: bool = false;
-
-fn make_event_settings() -> piston_window::EventSettings {
-  piston_window::EventSettings {
-    max_fps: DEFAULT_EVENT_MAX_FPS,
-    ups: DEFAULT_EVENT_UPS,
-    ups_reset: DEFAULT_EVENT_UPS_RESET,
-    swap_buffers: DEFAULT_EVENT_SWAP_BUFFERS,
-    bench_mode: DEFAULT_EVENT_BENCH_MODE,
-    lazy: DEFAULT_EVENT_LAZY,
+  // Create the Error, ErrorKind, ResultExt, and Result types
+  error_chain!{
+    foreign_links {
+      SerdeJson(serde_json::error::Error);
+      StdFmt(::std::fmt::Error);
+      StdIo(::std::io::Error) #[cfg(unix)];
+    }
   }
 }
 
-fn main() {
-  let window_settings = make_window_settings();
-  let event_settings = make_event_settings();
+mod config;
+mod handler;
+mod rust_rider;
+
+fn run() -> error::Result<()> {
+  use error::ResultExt;
+
+  let config = config::Config::from_path_str("config.json")
+    .chain_err(|| "Failed to create config")?;
+  let window_settings = piston_window::WindowSettings::from(&config);
+  let event_settings = piston_window::EventSettings::from(&config);
 
   let mut window: piston_window::PistonWindow =
     window_settings.build().unwrap_or_else(|error| {
@@ -81,4 +55,17 @@ fn main() {
 
   // Infer rust_rider::GameMode's implicit type argument from window.
   rust_rider::GameMode::<_>::new(&mut window).spin();
+
+  Ok(())
+}
+
+fn main() {
+  if let Err(ref e) = run() {
+    use std::io::Write;
+    use error_chain::ChainedError;
+
+    writeln!(::std::io::stderr(), "{}", e.display_chain())
+      .expect("Error writing to stderr");
+    ::std::process::exit(1);
+  }
 }
