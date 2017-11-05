@@ -4,58 +4,75 @@ extern crate std;
 
 use error;
 
-const DEFAULT_WINDOW_TITLE: &str = "Rust Rider";
-const DEFAULT_WINDOW_WIDTH: u32 = 1600;
-const DEFAULT_WINDOW_HEIGHT: u32 = 1000;
-const DEFAULT_WINDOW_SAMPLES: u8 = 0;
-const DEFAULT_WINDOW_FULLSCREEN: bool = false;
-const DEFAULT_WINDOW_EXIT_ON_ESC: bool = false;
-const DEFAULT_WINDOW_VSYNC: bool = false;
-const DEFAULT_WINDOW_SRGB: bool = false;
-const DEFAULT_WINDOW_RESIZABLE: bool = false;
-const DEFAULT_WINDOW_DECORATED: bool = false;
-const DEFAULT_WINDOW_CONTROLLERS: bool = false;
-
-const DEFAULT_EVENT_MAX_FPS: u64 = 60;
-const DEFAULT_EVENT_UPS: u64 = 120;
-const DEFAULT_EVENT_UPS_RESET: u64 = 2;
-const DEFAULT_EVENT_SWAP_BUFFERS: bool = true;
-const DEFAULT_EVENT_BENCH_MODE: bool = false;
-const DEFAULT_EVENT_LAZY: bool = false;
+fn default_window_size_width() -> u32 { 1600 }
+fn default_window_size_height() -> u32 { 1000 }
+fn default_window_samples() -> u8 { 0 }
+fn default_window_fullscreen() -> bool { false }
+fn default_window_exit_on_esc() -> bool { false }
+fn default_window_vsync() -> bool { false }
+fn default_window_srgb() -> bool { false }
+fn default_window_resizable() -> bool { false }
+fn default_window_decorated() -> bool { false }
+fn default_window_controllers() -> bool { false }
+fn default_event_max_fps() -> u64 { 60 }
+fn default_event_ups() -> u64 { 120 }
+fn default_event_ups_reset() -> u64 { 2 }
+fn default_event_swap_buffers() -> bool { true }
+fn default_event_bench_mode() -> bool { false }
+fn default_event_lazy() -> bool { false }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 struct WindowConfigSize {
+  #[serde(default="default_window_size_width")]
   width: u32,
+  #[serde(default="default_window_size_height")]
   height: u32,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 struct WindowConfig {
   title: String,
+  #[serde(default)]
   size: WindowConfigSize,
+  #[serde(default="default_window_samples")]
   samples: u8,
+  #[serde(default="default_window_fullscreen")]
   fullscreen: bool,
+  #[serde(default="default_window_exit_on_esc")]
   exit_on_esc: bool,
+  #[serde(default="default_window_vsync")]
   vsync: bool,
+  #[serde(default="default_window_srgb")]
   srgb: bool,
+  #[serde(default="default_window_resizable")]
   resizable: bool,
+  #[serde(default="default_window_decorated")]
   decorated: bool,
+  #[serde(default="default_window_controllers")]
   controllers: bool,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 struct EventConfig {
+  #[serde(default="default_event_max_fps")]
   max_fps: u64,
+  #[serde(default="default_event_ups")]
   ups: u64,
+  #[serde(default="default_event_ups_reset")]
   ups_reset: u64,
+  #[serde(default="default_event_swap_buffers")]
   swap_buffers: bool,
+  #[serde(default="default_event_bench_mode")]
   bench_mode: bool,
+  #[serde(default="default_event_lazy")]
   lazy: bool,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Config {
+  #[serde(default)]
   window: WindowConfig,
+  #[serde(default)]
   event: EventConfig,
 }
 
