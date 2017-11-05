@@ -1,5 +1,6 @@
 #![cfg_attr(feature = "strict", deny(missing_docs))]
 #![cfg_attr(feature = "strict", deny(warnings))]
+#![feature(try_from)]
 #![recursion_limit = "1024"]
 
 //! Rust Rider
@@ -25,21 +26,17 @@ mod handler;
 mod rust_rider;
 
 fn run() -> error::Result<()> {
-  use error::ResultExt;
+  use error::ResultExt; // chain_err
+  use std::convert::TryFrom; // try_from
 
-  let config = config::Config::from_path_str("config.json")
-    .chain_err(|| "Failed to create config")?;
-  let window_settings = piston_window::WindowSettings::from(&config);
-  let event_settings = piston_window::EventSettings::from(&config);
-
-  let mut window: piston_window::PistonWindow =
-    window_settings.build().unwrap_or_else(|error| {
-      panic!("Failed to build PistonWindow: {}", error)
-    });
-  {
-    use piston_window::EventLoop; // set_event_settings
-    window.set_event_settings(event_settings);
-  }
+  let config = config::Config::from_path_str("config.json").chain_err(|| {
+    "Failed to create config"
+  })?;
+  let mut window = piston_window::PistonWindow::try_from(&config).chain_err(
+    || {
+      "Failed to build window"
+    },
+  )?;
 
   // Infer rust_rider::GameMode's implicit type argument from window.
   rust_rider::GameMode::<_>::new(&mut window).spin();

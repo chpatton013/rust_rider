@@ -159,3 +159,24 @@ impl<'a> From<&'a Config> for piston_window::EventSettings {
     }
   }
 }
+
+impl<'a> std::convert::TryFrom<&'a Config> for piston_window::PistonWindow {
+  type Error = error::Error;
+
+  fn try_from(
+    config: &'a Config,
+  ) -> error::Result<piston_window::PistonWindow> {
+    use piston_window::EventLoop; // set_event_settings
+
+    let window_settings = piston_window::WindowSettings::from(config);
+    let event_settings = piston_window::EventSettings::from(config);
+
+    match window_settings.build::<piston_window::PistonWindow>() {
+      Ok(mut window) => {
+        window.set_event_settings(event_settings);
+        Ok(window)
+      },
+      Err(message) => Err(error::Error::from(message)),
+    }
+  }
+}
