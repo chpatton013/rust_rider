@@ -23,8 +23,8 @@ fn draw_line_segment<G>(
 ) where
   G: graphics::Graphics,
 {
-  // Bring context.trans() and context.orient() into scope.
-  use self::graphics::Transformed;
+  use self::graphics::Transformed; // piston_window::Context.{trans,orient}
+
   let tangent = point2 - point1;
   let width = nalgebra::distance(point1, point2);
   let height = 4.0;
@@ -272,8 +272,7 @@ where
   /// TODO: Move this into a Game struct so we can switch game modes.
   pub fn spin(&mut self) {
     while let Some(event) = self.window.next() {
-      // Bring on_event() into scope.
-      use handler::EventHandler;
+      use handler::EventHandler; // on_event
       self.on_event(&event);
     }
   }

@@ -4,28 +4,60 @@ extern crate std;
 
 use error;
 
-fn default_window_size_width() -> u32 { 1600 }
-fn default_window_size_height() -> u32 { 1000 }
-fn default_window_samples() -> u8 { 0 }
-fn default_window_fullscreen() -> bool { false }
-fn default_window_exit_on_esc() -> bool { false }
-fn default_window_vsync() -> bool { false }
-fn default_window_srgb() -> bool { false }
-fn default_window_resizable() -> bool { false }
-fn default_window_decorated() -> bool { false }
-fn default_window_controllers() -> bool { false }
-fn default_event_max_fps() -> u64 { 60 }
-fn default_event_ups() -> u64 { 120 }
-fn default_event_ups_reset() -> u64 { 2 }
-fn default_event_swap_buffers() -> bool { true }
-fn default_event_bench_mode() -> bool { false }
-fn default_event_lazy() -> bool { false }
+fn default_window_size_width() -> u32 {
+  1600
+}
+fn default_window_size_height() -> u32 {
+  1000
+}
+fn default_window_samples() -> u8 {
+  0
+}
+fn default_window_fullscreen() -> bool {
+  false
+}
+fn default_window_exit_on_esc() -> bool {
+  false
+}
+fn default_window_vsync() -> bool {
+  false
+}
+fn default_window_srgb() -> bool {
+  false
+}
+fn default_window_resizable() -> bool {
+  false
+}
+fn default_window_decorated() -> bool {
+  false
+}
+fn default_window_controllers() -> bool {
+  false
+}
+fn default_event_max_fps() -> u64 {
+  60
+}
+fn default_event_ups() -> u64 {
+  120
+}
+fn default_event_ups_reset() -> u64 {
+  2
+}
+fn default_event_swap_buffers() -> bool {
+  true
+}
+fn default_event_bench_mode() -> bool {
+  false
+}
+fn default_event_lazy() -> bool {
+  false
+}
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 struct WindowConfigSize {
-  #[serde(default="default_window_size_width")]
+  #[serde(default = "default_window_size_width")]
   width: u32,
-  #[serde(default="default_window_size_height")]
+  #[serde(default = "default_window_size_height")]
   height: u32,
 }
 
@@ -34,37 +66,37 @@ struct WindowConfig {
   title: String,
   #[serde(default)]
   size: WindowConfigSize,
-  #[serde(default="default_window_samples")]
+  #[serde(default = "default_window_samples")]
   samples: u8,
-  #[serde(default="default_window_fullscreen")]
+  #[serde(default = "default_window_fullscreen")]
   fullscreen: bool,
-  #[serde(default="default_window_exit_on_esc")]
+  #[serde(default = "default_window_exit_on_esc")]
   exit_on_esc: bool,
-  #[serde(default="default_window_vsync")]
+  #[serde(default = "default_window_vsync")]
   vsync: bool,
-  #[serde(default="default_window_srgb")]
+  #[serde(default = "default_window_srgb")]
   srgb: bool,
-  #[serde(default="default_window_resizable")]
+  #[serde(default = "default_window_resizable")]
   resizable: bool,
-  #[serde(default="default_window_decorated")]
+  #[serde(default = "default_window_decorated")]
   decorated: bool,
-  #[serde(default="default_window_controllers")]
+  #[serde(default = "default_window_controllers")]
   controllers: bool,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 struct EventConfig {
-  #[serde(default="default_event_max_fps")]
+  #[serde(default = "default_event_max_fps")]
   max_fps: u64,
-  #[serde(default="default_event_ups")]
+  #[serde(default = "default_event_ups")]
   ups: u64,
-  #[serde(default="default_event_ups_reset")]
+  #[serde(default = "default_event_ups_reset")]
   ups_reset: u64,
-  #[serde(default="default_event_swap_buffers")]
+  #[serde(default = "default_event_swap_buffers")]
   swap_buffers: bool,
-  #[serde(default="default_event_bench_mode")]
+  #[serde(default = "default_event_bench_mode")]
   bench_mode: bool,
-  #[serde(default="default_event_lazy")]
+  #[serde(default = "default_event_lazy")]
   lazy: bool,
 }
 
