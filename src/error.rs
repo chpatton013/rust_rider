@@ -1,5 +1,4 @@
 extern crate error_chain;
-extern crate piston_window;
 extern crate serde_json;
 extern crate std;
 

@@ -20,6 +20,7 @@ extern crate piston_window;
 extern crate serde_derive;
 extern crate serde_json;
 
+mod application;
 mod config;
 mod error;
 mod handler;
@@ -38,8 +39,12 @@ fn run() -> error::Result<()> {
     },
   )?;
 
-  // Infer rust_rider::GameMode's implicit type argument from window.
-  rust_rider::GameMode::<_>::new(&mut window).spin();
+  let mut app = application::Application::<_, _>::new(&mut window);
+  app.add_application_mode(String::from("rust_rider"), Box::new(rust_rider::GameMode::<_>::new(&mut window)))
+    .chain_err(|| "Failed to add rust rider application mode");
+  app.set_active_application_mode("rust_rider")
+    .chain_err(|| "Failed to activate rust rider application mode");
+  app.spin().chain_err(|| "Failed to spin")?;
 
   Ok(())
 }

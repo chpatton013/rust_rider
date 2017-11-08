@@ -267,13 +267,4 @@ where
       state: state,
     }
   }
-
-  /// Process events from window until termination.
-  /// TODO: Move this into a Game struct so we can switch game modes.
-  pub fn spin(&mut self) {
-    while let Some(event) = self.window.next() {
-      use handler::EventHandler; // on_event
-      self.on_event(&event);
-    }
-  }
 }
