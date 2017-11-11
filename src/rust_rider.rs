@@ -3,8 +3,10 @@ extern crate nalgebra;
 extern crate piston;
 extern crate piston_window;
 
-use std::collections::VecDeque;
+use std::cell::RefCell;
+use std::rc::Rc;
 
+use error;
 use handler;
 
 enum EditMode {
@@ -68,7 +70,7 @@ const BLUE: piston_window::types::Color = [0.0, 0.0, 1.0, 1.0];
 /// for a resumable session of the game.
 pub struct State {
   edit_mode: EditMode,
-  line_segments: VecDeque<LineSegment>,
+  line_segments: Vec<LineSegment>,
   active_line_segment: Option<Point>,
   mouse_position: Point,
 }
@@ -78,45 +80,72 @@ impl State {
   pub fn new() -> State {
     State {
       edit_mode: EditMode::Insert,
-      line_segments: VecDeque::new(),
+      line_segments: Vec::new(),
       active_line_segment: None,
       mouse_position: Point::new(0.0, 0.0),
     }
   }
 }
 
-pub struct GameMode<'w, W>
+pub struct GameMode<Window>
 where
-  W: 'w + piston_window::Window,
+  Window: piston_window::Window,
 {
   state: State,
-  window: &'w mut piston_window::PistonWindow<W>,
+  window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
 }
 
 /// How GameMode responds to input-events.
-impl<'w, E, W> handler::InputHandler<E> for GameMode<'w, W>
-where E: piston_window::GenericEvent,
-      W: 'w + piston_window::Window,
+impl<Window> handler::InputHandler for GameMode<Window>
+where Window: piston_window::Window,
 {
-  fn on_button(&mut self,
-               _event: &E,
-               _button_args: &piston_window::ButtonArgs) {
-  }
-
-  fn on_controller_axis(
+  fn on_button<Event: piston_window::GenericEvent>(
     &mut self,
-    _event: &E,
-    _controller_axis_args: &piston_window::ControllerAxisArgs) {}
-
-  fn on_mouse_cursor(&mut self, _event: &E, position: &[f64; 2]) {
-    self.state.mouse_position = Point::new(position[0], position[1]);
+    _event: &Event,
+    _button_args: &piston_window::ButtonArgs,
+  ) -> error::Result<()> {
+    Ok(())
   }
 
-  fn on_mouse_relative(&mut self, _event: &E, _relative: &[f64; 2]) {}
+  fn on_controller_axis<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    _controller_axis_args: &piston_window::ControllerAxisArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
-  fn on_mouse_scroll(&mut self, _event: &E, _scroll: &[f64; 2]) {}
+  fn on_mouse_cursor<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    position: &[f64; 2],
+  ) -> error::Result<()> {
+    self.state.mouse_position = Point::new(position[0], position[1]);
 
-  fn on_press(&mut self, _event: &E, button: &piston_window::Button) {
+    Ok(())
+  }
+
+  fn on_mouse_relative<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    _relative: &[f64; 2],
+  ) -> error::Result<()> {
+    Ok(())
+  }
+
+  fn on_mouse_scroll<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    _scroll: &[f64; 2],
+  ) -> error::Result<()> {
+    Ok(())
+  }
+
+  fn on_press<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    button: &piston_window::Button,
+  ) -> error::Result<()> {
     match button {
       &piston_window::Button::Keyboard(key) => match key {
         piston_window::Key::LShift | piston_window::Key::RShift => {
@@ -132,9 +161,15 @@ where E: piston_window::GenericEvent,
       },
       _ => {},
     }
+
+    Ok(())
   }
 
-  fn on_release(&mut self, _event: &E, button: &piston_window::Button) {
+  fn on_release<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    button: &piston_window::Button,
+  ) -> error::Result<()> {
     match button {
       &piston_window::Button::Keyboard(key) => match key {
         piston_window::Key::LShift | piston_window::Key::RShift => {
@@ -146,7 +181,7 @@ where E: piston_window::GenericEvent,
         piston_window::MouseButton::Left => {
           match self.state.active_line_segment {
             Some(point1) => {
-              self.state.line_segments.push_back(
+              self.state.line_segments.push(
                 LineSegment::new(point1, self.state.mouse_position));
               self.state.active_line_segment = None;
             }
@@ -157,49 +192,97 @@ where E: piston_window::GenericEvent,
       },
       _ => {},
     }
+
+    Ok(())
   }
 
-  fn on_text(&mut self, _event: &E, _text: &String) {}
+  fn on_text<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    _text: &String,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
-  fn on_touch(&mut self, _event: &E, _touch_args: &piston_window::TouchArgs) {}
+  fn on_touch<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    _touch_args: &piston_window::TouchArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 }
 
 /// How GameMode responds to update-events.
-impl<'w, E, W> handler::UpdateHandler<E> for GameMode<'w, W>
-where E: piston_window::GenericEvent,
-      W: 'w + piston_window::Window,
+impl<Window> handler::UpdateHandler for GameMode<Window>
+where Window: piston_window::Window,
 {
-  fn on_idle(&mut self, _event: &E, _idle_args: &piston_window::IdleArgs) {}
+  fn on_idle<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    _idle_args: &piston_window::IdleArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
-  fn on_update(&mut self,
-               _event: &E,
-               _update_args: &piston_window::UpdateArgs) {}
+  fn on_update<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    _update_args: &piston_window::UpdateArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 }
 
 /// How GameMode responds to window-events.
-impl<'w, E, W> handler::WindowHandler<E> for GameMode<'w, W>
-where E: piston_window::GenericEvent,
-      W: 'w + piston_window::OpenGLWindow,
+impl<Window> handler::WindowHandler for GameMode<Window>
+where Window: piston_window::OpenGLWindow,
 {
-  fn on_after_render(&mut self,
-                     _event: &E,
-                     _after_render_args: &piston_window::AfterRenderArgs) {}
+  fn on_after_render<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    _after_render_args: &piston_window::AfterRenderArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
-  fn on_close(&mut self, _event: &E, _close_args: &piston_window::CloseArgs) {}
+  fn on_close<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    _close_args: &piston_window::CloseArgs,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
-  fn on_cursor(&mut self, _event: &E, _cursor: bool) {}
+  fn on_cursor<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    _cursor: bool,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
-  fn on_focus(&mut self, _event: &E, _focus: bool) {}
+  fn on_focus<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    _focus: bool,
+  ) -> error::Result<()> {
+    Ok(())
+  }
 
-  fn on_render(&mut self, event: &E, _render_args: &piston_window::RenderArgs) {
+  fn on_render<Event: piston_window::GenericEvent>(
+    &mut self,
+    event: &Event,
+    _render_args: &piston_window::RenderArgs,
+  ) -> error::Result<()> {
+    use piston_window::Window; // size
+
     // Borrow member references immutably before allowing self to be borrowed
     // mutably by self.window.draw_2d().
     let state = &self.state;
-    // Bring draw_size() into scope.
-    use piston_window::Window;
-    let window_size = self.window.size();
+    let window_size = self.window.borrow().size();
 
-    self.window.draw_2d(event, |context, graphics| {
+    self.window.borrow_mut().draw_2d(event, |context, graphics| {
       let edit_bar_color = match state.edit_mode {
         EditMode::Insert => GREEN,
         EditMode::Select => BLUE,
@@ -233,35 +316,40 @@ where E: piston_window::GenericEvent,
         line.draw(&context, graphics);
       }
     });
+
+    Ok(())
   }
 
-  fn on_resize(&mut self, _event: &E, _size: &[u32; 2]) {}
+  fn on_resize<Event: piston_window::GenericEvent>(
+    &mut self,
+    _event: &Event,
+    _size: &[u32; 2],
+  ) -> error::Result<()> {
+    Ok(())
+  }
 }
 
 /// Inherit default implementation of EventHandler::on_event.
-impl<'w, E, W> handler::EventHandler<E> for GameMode<'w, W>
-where E: piston_window::GenericEvent,
-      W: 'w + piston_window::OpenGLWindow,
+impl<Window> handler::EventHandler for GameMode<Window>
+where Window: piston_window::OpenGLWindow,
 {}
 
-impl<'w, W> GameMode<'w, W>
+impl<Window> GameMode<Window>
 where
-  W: 'w
-    + piston_window::Window
-    + piston_window::OpenGLWindow,
+  Window: piston_window::Window + piston_window::OpenGLWindow,
 {
   /// Create a GameMode for a new game.
   pub fn new(
-    window: &'w mut piston_window::PistonWindow<W>,
-  ) -> GameMode<'w, W> {
+    window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
+  ) -> GameMode<Window> {
     GameMode::new_with_state(window, State::new())
   }
 
   /// Create a GameMode with an existing State.
   pub fn new_with_state(
-    window: &'w mut piston_window::PistonWindow<W>,
+    window: Rc<RefCell<piston_window::PistonWindow<Window>>>,
     state: State,
-  ) -> GameMode<'w, W> {
+  ) -> GameMode<Window> {
     GameMode {
       window: window,
       state: state,

@@ -26,6 +26,9 @@ mod error;
 mod handler;
 mod rust_rider;
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 fn run() -> error::Result<()> {
   use error::ResultExt; // chain_err
   use std::convert::TryFrom; // try_from
@@ -33,17 +36,26 @@ fn run() -> error::Result<()> {
   let config = config::Config::from_path_str("config.json").chain_err(|| {
     "Failed to create config"
   })?;
-  let mut window = piston_window::PistonWindow::try_from(&config).chain_err(
+  let window = Rc::new(RefCell::new(
+    piston_window::PistonWindow::try_from(&config).chain_err(
+      || {
+        "Failed to build window"
+      },
+    )?,
+  ));
+
+  let mut app = application::Application::<_, _>::new(window.clone());
+  app
+    .add_application_mode(
+      "rust_rider",
+      Box::new(rust_rider::GameMode::<_>::new(window.clone())),
+    )
+    .chain_err(|| "Failed to add rust rider application mode")?;
+  app.set_active_application_mode("rust_rider").chain_err(
     || {
-      "Failed to build window"
+      "Failed to activate rust rider application mode"
     },
   )?;
-
-  let mut app = application::Application::<_, _>::new(&mut window);
-  app.add_application_mode(String::from("rust_rider"), Box::new(rust_rider::GameMode::<_>::new(&mut window)))
-    .chain_err(|| "Failed to add rust rider application mode");
-  app.set_active_application_mode("rust_rider")
-    .chain_err(|| "Failed to activate rust rider application mode");
   app.spin().chain_err(|| "Failed to spin")?;
 
   Ok(())

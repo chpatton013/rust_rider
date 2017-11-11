@@ -125,8 +125,8 @@ impl Config {
   }
 }
 
-impl<'a> From<&'a Config> for piston_window::WindowSettings {
-  fn from(config: &'a Config) -> piston_window::WindowSettings {
+impl<'config> From<&'config Config> for piston_window::WindowSettings {
+  fn from(config: &'config Config) -> piston_window::WindowSettings {
     let window_settings = piston_window::WindowSettings::new(
       config.window.title.as_str(),
       piston_window::Size {
@@ -147,8 +147,8 @@ impl<'a> From<&'a Config> for piston_window::WindowSettings {
   }
 }
 
-impl<'a> From<&'a Config> for piston_window::EventSettings {
-  fn from(config: &'a Config) -> piston_window::EventSettings {
+impl<'config> From<&'config Config> for piston_window::EventSettings {
+  fn from(config: &'config Config) -> piston_window::EventSettings {
     piston_window::EventSettings {
       max_fps: config.event.max_fps,
       ups: config.event.ups,
@@ -160,11 +160,12 @@ impl<'a> From<&'a Config> for piston_window::EventSettings {
   }
 }
 
-impl<'a> std::convert::TryFrom<&'a Config> for piston_window::PistonWindow {
+impl<'config> std::convert::TryFrom<&'config Config>
+  for piston_window::PistonWindow {
   type Error = error::Error;
 
   fn try_from(
-    config: &'a Config,
+    config: &'config Config,
   ) -> error::Result<piston_window::PistonWindow> {
     use piston_window::EventLoop; // set_event_settings
 
